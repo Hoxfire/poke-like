@@ -16,6 +16,7 @@ public class InputController : MonoBehaviour
     //on the gameobject
     private Rigidbody2D rb;
     private SpriteRenderer playerRenderer;
+    private Animator animator;
 
     //Player Controls
     [Header("Player Controls")]
@@ -30,6 +31,7 @@ public class InputController : MonoBehaviour
 
         rb = GetComponent<Rigidbody2D>();
         playerRenderer = GetComponent<SpriteRenderer>();
+        animator = GetComponent<Animator>();
     }
 
     private void FixedUpdate()
@@ -42,10 +44,17 @@ public class InputController : MonoBehaviour
     private void UpdateSpriteDirection()
     {
         Vector2 input = playerActions.Move.ReadValue<Vector2>();
+        
         if (input.x > 0)
             playerRenderer.flipX = false;
         else if (input.x < 0)
             playerRenderer.flipX = true;
+        if (input.y > 0)
+            animator.SetBool("Forward",false);
+        else if (input.y < 0)
+            animator.SetBool("Forward", true);
+
+        animator.SetBool("IsMoving", IsMoving);
     }
     private void Move()
     {
