@@ -21,8 +21,8 @@ public class InputController : MonoBehaviour
     //Player Controls
     [Header("Player Controls")]
     [SerializeField] private float walkSpeed;
-
-    private const float GRID_SIZE = 1f;
+    [SerializeField] private float gridSize = 1f;
+    [SerializeField] public LayerMask obstacleLayer;
 
     private void Awake()
     {
@@ -61,13 +61,30 @@ public class InputController : MonoBehaviour
         if (isMoving) return;
 
         Vector2 input = playerActions.Move.ReadValue<Vector2>();
-        Vector2 direction = new Vector2(Mathf.Round(input.x), Mathf.Round(input.y));
+        Vector2 direction = Vector2.zero;
 
-        if (direction != Vector2.zero)
+        // Prioritize horizontal movement
+        if (Mathf.Abs(input.x) > 0)
         {
-            targetPosition = (Vector2)transform.position + direction * GRID_SIZE;
+            direction.x = Mathf.Sign(input.x);
+        }
+        // If no horizontal input, check for vertical
+        else if (Mathf.Abs(input.y) > 0)
+        {
+            direction.y = Mathf.Sign(input.y);
+        }
+
+        if (CanMove(direction))
+        {
+            targetPosition = (Vector2)transform.position + direction * gridSize;
             StartCoroutine(MoveStep());
         }
+    }
+
+    private bool CanMove(Vector2 direction)
+    {
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, gridSize, obstacleLayer);
+        return hit.collider == null;
     }
 
     private IEnumerator MoveStep()
