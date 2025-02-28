@@ -1,4 +1,4 @@
-Game Description
+<a href="https://github.com/Hoxfire/poke-like/wiki">Game Description</a>
 
   I got the idea to make this game after playing Pokémon Blue, that's why the temp name is poke-like. 
   So I've always been a fan of 1bit art and wanted to make a game with the style for a while, so I decided to do it with this. 
