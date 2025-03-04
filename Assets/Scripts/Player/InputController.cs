@@ -8,6 +8,7 @@ public class InputController : MonoBehaviour
 {
     private PlayerControls playerControls;
     private PlayerControls.PlayerActions playerActions;
+    private PlayerControls.MenuActions menuActions;
 
     private bool isMoving;
     //a getter it lets you get the isMoveing Value without changing it by acident
@@ -24,10 +25,14 @@ public class InputController : MonoBehaviour
     [SerializeField] private float gridSize = 1f;
     [SerializeField] public LayerMask obstacleLayer;
 
+    [Header("Inventory Controls")]
+    [SerializeField] private InventoryManager inventoryManager;
+
     private void Awake()
     {
         playerControls = new PlayerControls();
         playerActions = playerControls.Player;
+        menuActions = playerControls.Menu;
 
         rb = GetComponent<Rigidbody2D>();
         playerRenderer = GetComponent<SpriteRenderer>();
@@ -38,6 +43,7 @@ public class InputController : MonoBehaviour
     {
         Move();
         UpdateSpriteDirection();
+        Inventory();
     }
 
     private Vector2 targetPosition;
@@ -98,6 +104,29 @@ public class InputController : MonoBehaviour
 
         transform.position = targetPosition;
         isMoving = false;
+    }
+
+    private bool wasInventoryPressedLastFrame = false;
+
+    private void Inventory()
+    {
+        bool isInventoryPressed = menuActions.Interact.IsPressed();
+
+        if (isInventoryPressed && !wasInventoryPressedLastFrame)
+        {
+            inventoryManager.ToggleInventory();
+            Debug.Log("Inventory");
+            if (!inventoryManager.inventoryPanel.activeSelf)
+            {
+                playerActions.Enable();
+            }
+            else
+            {
+                playerActions.Disable();
+            }
+        }
+
+        wasInventoryPressedLastFrame = isInventoryPressed;
     }
 
     private void OnEnable()
