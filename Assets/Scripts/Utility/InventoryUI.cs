@@ -25,16 +25,8 @@ public class InventoryUI : MonoBehaviour
             GameObject slot = Instantiate(itemSlotPrefab, itemsParent);
             slot.transform.position = new Vector2 (index, indey);
             Image icon = slot.GetComponentInChildren<Image>();
-            //TMP_Text nameText = slot.GetComponentInChildren<TMP_Text>();
             icon.sprite = item.Icon;
-            //nameText.text = item.Name;
-            /*
-            if (item is IStackable stackable)
-            {
-                TMP_Text stackText = slot.GetComponentInChildren<TMP_Text>();
-                stackText.text = stackable.StackSize.ToString();
-            }
-            */
+            
             Button button = slot.GetComponent<Button>();
             button.onClick.AddListener(() => inventoryManager.UseItem(item));
 
@@ -46,7 +38,7 @@ public class InventoryUI : MonoBehaviour
             else
                 index++;
 
-            Debug.Log(index);
+            //Debug.Log(index);
         }
     }
 }

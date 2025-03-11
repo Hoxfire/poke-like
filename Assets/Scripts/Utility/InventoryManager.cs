@@ -30,7 +30,5 @@ public class InventoryManager : MonoBehaviour
     public void ToggleInventory()
     {
         inventoryPanel.SetActive(!inventoryPanel.activeSelf);
-        // Optionally pause the game when inventory is open
-        //Time.timeScale = inventoryPanel.activeSelf ? 0 : 1;
     }
 }

@@ -1,18 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
-public class SceneEventChanle : MonoBehaviour
+[CreateAssetMenu(fileName = "New Scene Event Channel", menuName = "Events/Scene Event Channel")]
+public class SceneEventChanle : ScriptableObject
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public UnityAction<string> OnSceneRequested;
 
-    // Update is called once per frame
-    void Update()
+    public void RaiseEvent(string sceneName)
     {
-        
+        OnSceneRequested?.Invoke(sceneName);
     }
 }

@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using DG.Tweening;
+using UnityEngine.SceneManagement;
+using UnityEngine.Animations;
 
 public class InputController : MonoBehaviour
 {
+    public static InputController instance;
+
     private PlayerControls playerControls;
     private PlayerControls.PlayerActions playerActions;
     private PlayerControls.MenuActions menuActions;
@@ -21,15 +25,27 @@ public class InputController : MonoBehaviour
 
     //Player Controls
     [Header("Player Controls")]
-    [SerializeField] private float walkSpeed;
+    [SerializeField] public float walkSpeed;
     [SerializeField] private float gridSize = 1f;
     [SerializeField] public LayerMask obstacleLayer;
 
-    [Header("Inventory Controls")]
+    [Header("Menu Controls")]
+    [SerializeField] private MenuManager menuManager;
     [SerializeField] private InventoryManager inventoryManager;
 
     private void Awake()
     {
+
+        if (instance != null)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+
         playerControls = new PlayerControls();
         playerActions = playerControls.Player;
         menuActions = playerControls.Menu;
@@ -43,7 +59,7 @@ public class InputController : MonoBehaviour
     {
         Move();
         UpdateSpriteDirection();
-        Inventory();
+        Menu();
     }
 
     private Vector2 targetPosition;
@@ -84,6 +100,7 @@ public class InputController : MonoBehaviour
         {
             targetPosition = (Vector2)transform.position + direction * gridSize;
             StartCoroutine(MoveStep());
+            //Camera.main.transform.rotation = Quaternion.Euler(Vector3.zero);
         }
     }
 
@@ -99,6 +116,7 @@ public class InputController : MonoBehaviour
         while ((Vector2)transform.position != targetPosition)
         {
             transform.position = Vector2.MoveTowards(transform.position, targetPosition, walkSpeed * Time.deltaTime);
+            //Camera.main.transform.DOShakeRotation(0.05f,5,2);
             yield return null;
         }
 
@@ -106,17 +124,18 @@ public class InputController : MonoBehaviour
         isMoving = false;
     }
 
-    private bool wasInventoryPressedLastFrame = false;
+    private bool wasUIPressedLastFrame = false;
 
-    private void Inventory()
+    private void Menu()
     {
-        bool isInventoryPressed = menuActions.Interact.IsPressed();
+        //This is to open the menu and check if the button was pressed inthe last frame
+        bool isMenuPressed = menuActions.Open.IsPressed();
 
-        if (isInventoryPressed && !wasInventoryPressedLastFrame)
+        if (isMenuPressed && !wasUIPressedLastFrame)
         {
-            inventoryManager.ToggleInventory();
-            Debug.Log("Inventory");
-            if (!inventoryManager.inventoryPanel.activeSelf)
+            menuManager.ToggleMenu();
+            Debug.Log("Menu");
+            if (!menuManager.menuPanle.activeSelf)
             {
                 playerActions.Enable();
             }
@@ -126,7 +145,26 @@ public class InputController : MonoBehaviour
             }
         }
 
-        wasInventoryPressedLastFrame = isInventoryPressed;
+        //moves the currsor in the first menu up and down
+        bool upAndDown = menuActions.Move.IsPressed();
+
+        if (upAndDown && !wasUIPressedLastFrame)
+        {
+            Vector2 pos = menuActions.Move.ReadValue<Vector2>();
+
+            menuManager.menuUI.UpdateCursor(pos, menuManager.menuState);
+        }
+
+        wasUIPressedLastFrame = isMenuPressed;
+    }
+
+    public IEnumerator sceneTransition(string newScene, DoorEventChannel doorEventChannel, Vector2 newPos)
+    {
+        playerControls.Disable();
+        yield return new WaitForSeconds(1);
+        playerControls.Enable();
+        doorEventChannel.RaiseDoorEnteredEvent(newScene);
+        transform.position = newPos;
     }
 
     private void OnEnable()
